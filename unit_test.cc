@@ -227,10 +227,6 @@ int main0(){
         }
 
     }
-
-
-
-
     return 0;
 }
 
@@ -286,7 +282,47 @@ int main1(){
 }
 
 
-int main(){ return main1(); }
+
+
+#include <stdio.h>
+
+struct assume_map{
+    
+    const char * filer_main_k="filter_main";
+    const char * filer_main_v="filter_main_v";
+    
+    const char * filer_value_k="filter_value";
+    const char * filer_value_v="filter_value_v";
+    const char * filer_size_k="filter_size";
+    const char * filer_size_v="filter_size_v";
+    
+} __attribute__((aligned(8)));
+
+
+#include <cstring>
+
+
+int main2(){
+    auto f = new assume_map;
+    auto btree = reinterpret_cast<const char **>(f);
+    static auto fp = (char **)0;
+    auto key = "filter_value";
+    auto len = sizeof(*f)/sizeof(char *);
+    auto step = sizeof(char *) * 2;
+    auto cmp_f = [](intptr_t l,intptr_t r,void* arg){ return strcmp(*(const char **)l,*(const char **)r); };
+    if(0==kautil_bt_search_v3((void ** )&fp,(const void*)&key,btree,btree+len,step,nullptr,cmp_f)){
+        printf("found : %s\n",*(fp+1));
+    } 
+    else printf("fail.");
+    delete f;
+    
+    
+    return 0;
+}
+
+
+int main(){ return main2(); }
+//int main(){ return main1(); }
 
 
 
