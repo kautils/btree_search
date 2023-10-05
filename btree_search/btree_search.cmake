@@ -38,6 +38,14 @@ target_link_libraries(${__t} PRIVATE ${${module_name}_interface})
 target_compile_definitions(${__t} PRIVATE ${${module_name}_interface_tmain_ppcs})
 
 
+
+
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/include/kautil/btree_search")
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/kautil)
+    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR} "${CMAKE_CURRENT_LIST_DIR}/include/kautil/btree_search" SYMBOLIC)
+endif()
+
+
 foreach(__v ${${m}_unsetter})
     unset(${__v})
 endforeach()
