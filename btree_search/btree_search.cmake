@@ -40,9 +40,10 @@ target_compile_definitions(${__t} PRIVATE ${${module_name}_interface_tmain_ppcs}
 
 
 
-if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/include/kautil/btree_search")
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/kautil)
-    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR} "${CMAKE_CURRENT_LIST_DIR}/include/kautil/btree_search" SYMBOLIC)
+set(${m}_include_symlink ${CMAKE_CURRENT_LIST_DIR}/include/kautil/algorithm)
+if(NOT EXISTS "${${m}_include_symlink}/btree_search")
+    file(MAKE_DIRECTORY ${${m}_include_symlink})
+    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR} "${${m}_include_symlink}/btree_search" SYMBOLIC)
 endif()
 
 
