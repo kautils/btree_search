@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(__version 1.0.1)
-project(KautilBtreeSearch.${__version}
+project(KautilAlgorithmBtreeSearch.${__version}
         LANGUAGES C CXX
         VERSION ${__version}
         )
