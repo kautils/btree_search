@@ -12,16 +12,18 @@ struct btree_search{
     btree_search(pref * prf) : prf(prf){}
     bool search(value_type const& want,offset_type * nearest_pos = nullptr, int * nearest_direction = nullptr){
         
-        value_type lv_ent;
-        auto *lv=&lv_ent; // in case of wanting to avoid copying value. for future, especially bigint. 
-        auto lb = offset_type(0);
+        struct value_info{
+            value_type ent;
+            value_type *v=&ent; // in case of wanting to avoid copying value. for future, especially bigint. 
+            offset_type b = offset_type(0);
+            bool done=false;
+        };
         
-        value_type rv_ent;
-        auto *rv=&rv_ent;
-        auto rb = offset_type(0);
+        auto l = value_info{};
+        auto r = value_info{};
         
         bool exact = false;
-        auto res = short(0);
+        auto res = short(-2);
         auto pos = offset_type(0);
         auto lower_limit_size = offset_type(0);
         auto upper_limit_size = prf->max_size();
@@ -30,27 +32,30 @@ struct btree_search{
         auto entire_direction = 1;
         auto entire_direction_init = false;
         auto block_size = prf->block_size();
-        auto is_continue = true;
+        //auto is_continue = true;
         
-        
-        
-        while(is_continue){
+        for(;res;){
             auto mid = ((max_size-min_size) /  2 + min_size);
             auto adj = mid % (block_size);
-            lb =   (mid > adj + (block_size))*static_cast<offset_type>(mid - adj - (block_size))
+            l.b =   (mid > adj + (block_size))*static_cast<offset_type>(mid - adj - (block_size))
                     +!(mid > adj + (block_size))*lower_limit_size;
-            rb = (mid > adj)*static_cast<offset_type>(mid - adj ) + !(mid > adj)*lower_limit_size;
-
-            prf->read_value(lb,&lv);
-
-            res = /*((want == lv) * 0) +*/ ((want < *lv)*-1) + (!(want < *lv)/* *1 */);  
-            pos=static_cast<offset_type>(lb-(block_size)*bool(res));
+            r.b = (mid > adj)*static_cast<offset_type>(mid - adj ) + !(mid > adj)*lower_limit_size;
+            // confirm to check both pole(lb,rb) because i ignore calclation of rb if possible.
+            if((l.b>=upper_limit_size) + (r.b>=upper_limit_size) + (l.b<=lower_limit_size) + (r.b<=lower_limit_size))break; 
+            
+            prf->read_value(l.b,&l.v);
+            l.done=true;
+            res = /*((want == lv) * 0) +*/ ((want < *l.v)*-1) + (!(want < *l.v)/* *1 */);  
+            pos=static_cast<offset_type>(l.b-(block_size)*bool(res));
+            
 
             if(res==1){
-                prf->read_value(rb,&rv);
-                res = /*((want == rv) * 0) +*/ ((want > *rv)/* *1 */);  
-                pos=static_cast<offset_type>(rb+(block_size*bool(res)));
+                prf->read_value(r.b,&r.v);
+                r.done=true;
+                res = /*((want == rv) * 0) +*/ ((want > *r.v)/* *1 */);  
+                pos=static_cast<offset_type>(r.b+(block_size*bool(res)));
             }
+            
 
             entire_direction = (entire_direction_init)*entire_direction + !(entire_direction_init)*res; 
             entire_direction_init=true;
@@ -58,29 +63,23 @@ struct btree_search{
             pos= (res>0)*pos;
             max_size=
                   (res>0)*((entire_direction==-1)*pos +!(entire_direction==-1)*max_size)
-                +!(res>0)*offset_type(lb); 
+                +!(res>0)*offset_type(l.b); 
 
             min_size=static_cast<offset_type>(
-                  (res>0)*((entire_direction==-1)*(rb+(block_size)) +!(entire_direction==-1)*pos)
+                  (res>0)*((entire_direction==-1)*(r.b+(block_size)) +!(entire_direction==-1)*pos)
                 +!(res>0)*min_size );
-
-            //printf("%d %ld [%ld %ld] (%ld %ld) |%ld %ld|\n",res,pos,lb,rb,lv,rv,min_size,max_size); fflush(stdout);
-            // confirm to check both pole(lb,rb) because i ignore calclation of rb if possible. 
-            is_continue= !( (res==0) + (lb>=upper_limit_size) + (rb>=upper_limit_size) + (lb<=lower_limit_size) + (rb<=lower_limit_size)); 
+            //printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         }
-
-        exact = (want == *rv) + (want == *lv);
+        exact = r.done*(want == *r.v) + r.done*(want == *l.v);
+        
+        
         if(nearest_pos){
-            auto a = (want>*rv)*(want - *rv)+!(want>*rv)*(*rv-want); 
-            auto b = (want>*lv)*(want - *lv)+!(want>*lv)*(*lv-want); 
-            *nearest_pos = (a>b)*lb + (a<b)*rb;
-            if(nearest_direction)
-                *nearest_direction= !exact*(
-                          (a>b)*((want<*lv)*-1+!(want<*lv))
-                        +!(a>b)*((want<*rv)*-1+!(want<*rv))
-                    );
-             //printf("%s. pos is %ld. direction is %d\n",exact?"found": "not found",*nearest_pos,*nearest_direction);
+            auto a = (want>*r.v)*(want - *r.v)+!(want>*r.v)*(*r.v-want); 
+            auto b = (want>*l.v)*(want - *l.v)+!(want>*l.v)*(*l.v-want); 
+            *nearest_pos = static_cast<offset_type>(a>b)*l.b + static_cast<offset_type>(a<b)*r.b;
+            if(nearest_direction)*nearest_direction= !exact*res;
         }
+        
         return exact;
     }
     

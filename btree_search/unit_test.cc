@@ -118,35 +118,46 @@ int memory_8b(uint64_t const& search_v ){
         
         offset_type block_size(){ return sizeof(value_type); }
         offset_type max_size(){ return size; }
-        void read_value(offset_type const& offset, value_type ** value){ *value=&data[offset/sizeof(value_type)]; }
+        void read_value(offset_type const& offset, value_type ** value){ 
+            *value=&data[offset/sizeof(value_type)]; 
+        }
     };
 
     constexpr auto len = 100; 
     memory_8b_arr_pref::value_type data[len];
     //auto search_v=memory_8b_arr_pref::value_type(550);
     auto cnt = 0;
-    for(auto i = 0; i <len; ++i) data[i] = i * 10;
+    for(auto i = 0; i <len; ++i) data[i] = i * 10 + 100;
     auto pref = memory_8b_arr_pref{.data=data,.size=sizeof(data)};
     {// main
         auto pos = memory_8b_arr_pref::offset_type(0);
         auto dir = int(0);
         auto bt = kautil::algorithm::btree_search{&pref};
         auto found = bt.search(static_cast<memory_8b_arr_pref::value_type>(search_v),&pos,&dir);
-        printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
-        return bt.search(static_cast<memory_8b_arr_pref::value_type>(search_v));
+        printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);fflush(stdout);
+        return found;
     }
 }
 
 int main(){
         
-    auto search_v = uint64_t(90);
-    
-    //  16 bytes array
-    file_syscall_16b(search_v);
-    memory_16b(search_v);
-    
+    auto search_v = uint64_t(100000);
+
     // 8 bytes array
     memory_8b(search_v);
+    
+    -1,1;
+    
+    return 0;
+    
+    {
+        //  16 bytes array
+        file_syscall_16b(search_v);
+        memory_16b(search_v);
+        
+        // 8 bytes array
+        memory_8b(search_v);
+    }
     
     
     return 0;
