@@ -71,43 +71,6 @@ int file_syscall_16b(uint64_t const & search_v){
     }
 }
 
-int memory_16b(uint64_t const& search_v){
-        
-    struct memory_16b_arr_pref{
-        using value_type = uint64_t;
-        using offset_type = uint64_t;
-
-        value_type * data =0;
-        offset_type size = 0;
-        
-        offset_type block_size(){ return sizeof(value_type)*2; }
-        offset_type max_size(){ return size; }
-        void read_value(offset_type const& offset, value_type ** value){ *value=&data[offset/sizeof(value_type)]; }
-        
-    };
-
-    constexpr auto len = 100; 
-    memory_16b_arr_pref::value_type data[len*2];
-    auto cnt = 0;
-    for(auto i = 0; i <len*2; i+=2){
-        data[i] = cnt*10;
-        data[i+1] = data[i]+10;
-        ++cnt;
-    }
-    
-    { // main 
-        auto pref = memory_16b_arr_pref{.data=data,.size=sizeof(data)};
-        auto pos = memory_16b_arr_pref::offset_type(0);
-        auto dir = int(0);
-        auto bt = kautil::algorithm::btree_search{&pref};
-        auto found = bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v),&pos,&dir);
-        printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
-        return bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v));
-        
-    }
-}
-
-
 int memory_8b(uint64_t const& search_v ){
     struct memory_8b_arr_pref{
         using value_type = uint64_t;
@@ -127,7 +90,9 @@ int memory_8b(uint64_t const& search_v ){
     memory_8b_arr_pref::value_type data[len];
     //auto search_v=memory_8b_arr_pref::value_type(550);
     auto cnt = 0;
-    for(auto i = 0; i <len; ++i) data[i] = i * 10 + 100;
+    for(auto i = 0; i <len; ++i){
+        data[i] = i * 10;
+    }
     auto pref = memory_8b_arr_pref{.data=data,.size=sizeof(data)};
     {// main
         auto pos = memory_8b_arr_pref::offset_type(0);
@@ -139,10 +104,51 @@ int memory_8b(uint64_t const& search_v ){
     }
 }
 
+
+int memory_16b(uint64_t const& search_v){
+        
+    struct memory_16b_arr_pref{
+        using value_type = uint64_t;
+        using offset_type = uint64_t;
+
+        value_type * data =0;
+        offset_type size = 0;
+        
+        offset_type block_size(){ return sizeof(value_type)*2; }
+        offset_type max_size(){ return size; }
+        void read_value(offset_type const& offset, value_type ** value){ *value=&data[offset/sizeof(value_type)]; }
+        
+    };
+
+    constexpr auto len = 100; 
+    memory_16b_arr_pref::value_type data[len*2];
+    auto cnt = 0;
+    for(auto i = 0; i <len*2; i+=2){
+        data[i] = i*10;
+        data[i+1] = data[i]+10;
+        //printf("%lld %lld\n",data[i],data[i+1]);
+    }
+    
+    { // main 
+        auto pref = memory_16b_arr_pref{.data=data,.size=sizeof(data)};
+        auto pos = memory_16b_arr_pref::offset_type(0);
+        auto dir = int(0);
+        auto bt = kautil::algorithm::btree_search{&pref};
+        auto found = bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v),&pos,&dir);
+        printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
+        return found;
+
+    }
+}
+
+
+
 int main(){
         
-    auto search_v = uint64_t(500);
-
+    auto search_v = uint64_t(999); // todo: valid but not sufficient. i also want both l and r values of last calc.  
+    memory_16b(search_v);
+    return (0);
+    
     {
         //  16 bytes array
         file_syscall_16b(search_v);
