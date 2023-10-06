@@ -9,7 +9,15 @@ struct btree_search{
     
     using  value_type= typename pref::value_type;
     using  offset_type= typename pref::offset_type;
+    
     btree_search(pref * prf) : prf(prf){}
+    
+    /// @return true if find [want]
+    
+    /** @note side-effect  
+     *  [nearest_pos]
+     *  [nearest_direction] : (-1,0,1) (left,exact,right) 
+     **/
     bool search(value_type const& want,offset_type * nearest_pos = nullptr, int * nearest_direction = nullptr){
         
         struct value_info{

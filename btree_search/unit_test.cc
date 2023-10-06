@@ -141,15 +141,8 @@ int memory_8b(uint64_t const& search_v ){
 
 int main(){
         
-    auto search_v = uint64_t(100000);
+    auto search_v = uint64_t(500);
 
-    // 8 bytes array
-    memory_8b(search_v);
-    
-    -1,1;
-    
-    return 0;
-    
     {
         //  16 bytes array
         file_syscall_16b(search_v);
