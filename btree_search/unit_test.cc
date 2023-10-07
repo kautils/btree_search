@@ -119,7 +119,8 @@ int memory_16b(uint64_t const& search_v){
         void read_value(offset_type const& offset, value_type ** value){ *value=&data[offset/sizeof(value_type)]; }
         
     };
-
+    
+    
     constexpr auto len = 100; 
     memory_16b_arr_pref::value_type data[len*2];
     auto cnt = 0;
@@ -134,9 +135,23 @@ int memory_16b(uint64_t const& search_v){
         auto pos = memory_16b_arr_pref::offset_type(0);
         auto dir = int(0);
         auto bt = kautil::algorithm::btree_search{&pref};
-        auto found = bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v),&pos,&dir);
-        printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
-        return found;
+
+        {
+            auto found = bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v),&pos,&dir);
+            printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
+            //return found;
+        }
+        
+        {
+            auto res = bt.__search(static_cast<memory_16b_arr_pref::value_type>(search_v));
+            int jjj = 0;
+            
+//            printf("%s. pos is %lld. direction is %d\n",found?"found": "not found",pos,dir);
+//            return found;
+        }
+        
+        
+        return true;
 
     }
 }
@@ -144,8 +159,9 @@ int memory_16b(uint64_t const& search_v){
 
 
 int main(){
-        
-    auto search_v = uint64_t(999); // todo: valid but not sufficient. i also want both l and r values of last calc.  
+    
+    
+    auto search_v = uint64_t(980); // todo: valid but not sufficient. i also want both l and r values of last calc.  
     memory_16b(search_v);
     return (0);
     
@@ -159,6 +175,8 @@ int main(){
     }
     
     
+    
+//  
     return 0;
 }
 
