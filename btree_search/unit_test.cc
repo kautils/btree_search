@@ -78,6 +78,9 @@ int file_syscall_16b(uint64_t const & search_v){
                        :"not found. before    pos is %lld. before    value is %lld.\n"
                        ,res.next_pos,res.next_value);
             }
+            if(res.overflow){
+                printf("overflow %s\n",res.overflow ? ((res.direction>0)?"upper":"lower"):"nothing" );
+            }
             return !res.direction;
         }
         
@@ -132,11 +135,14 @@ int memory_16b(uint64_t const& search_v){
                        :"not found. before    pos is %lld. before    value is %lld.\n"
                        ,res.next_pos,res.next_value);
             }
+            if(res.overflow){
+                printf("overflow %s\n",res.overflow ? ((res.direction>0)?"upper":"lower"):"nothing" );
+            }
         }
         
-        
         return true;
-
+        
+        
     }
 }
 
@@ -204,15 +210,15 @@ int memory_8b(uint64_t const& search_v ){
 int main(){
     
     
-    auto search_v = uint64_t(999); // todo: valid but not sufficient. i also want both l and r values of last calc.  
+    auto search_v = uint64_t(1000); // todo: valid but not sufficient. i also want both l and r values of last calc.  
 //    memory_16b(search_v);
 //    return (0);
     
     {
         //  16 bytes array
-//        file_syscall_16b(search_v);
-//        memory_16b(search_v);
-        
+        file_syscall_16b(search_v);
+        memory_16b(search_v);
+
         // 8 bytes array
         memory_8b(search_v);
     }
