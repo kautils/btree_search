@@ -73,7 +73,7 @@ int file_syscall_16b(uint64_t const & search_v){
             }else{
                 printf("not found. nearest   pos is %lld. nearest   value is %lld.\n"
                        ,res.pos,res.value);
-                printf((res.direction<0)?
+                printf((res.direction>0)?
                         "not found. next      pos is %lld. next      value is %lld.\n"
                        :"not found. before    pos is %lld. before    value is %lld.\n"
                        ,res.next_pos,res.next_value);
@@ -126,15 +126,16 @@ int memory_16b(uint64_t const& search_v){
         {
             auto res = bt.search(static_cast<memory_16b_arr_pref::value_type>(search_v));
             if(!res.direction){
-                printf("found. pos is %lld. value is %lld.\n",res.pos,res.value);
+                printf("%lld was found. pos is %lld. value is %lld.(",search_v,res.pos,res.value);
             }else{
-                printf("not found. nearest   pos is %lld. nearest   value is %lld.\n"
-                       ,res.pos,res.value);
-                printf((res.direction<0)?
-                        "not found. next      pos is %lld. next      value is %lld.\n"
-                       :"not found. before    pos is %lld. before    value is %lld.\n"
-                       ,res.next_pos,res.next_value);
+                printf("%lld was not found. nearest  pos is %lld. nearest   value is %lld."
+                       ,search_v,res.pos,res.value);
             }
+            printf((res.direction>0)?
+                    "not found. next      pos is %lld. next      value is %lld."
+                   :"not found. before    pos is %lld. before    value is %lld."
+                   ,res.next_pos,res.next_value);
+            printf("\n");
             if(res.overflow){
                 printf("overflow %s\n",res.overflow ? ((res.direction>0)?"upper":"lower"):"nothing" );
             }
@@ -193,7 +194,7 @@ int memory_8b(uint64_t const& search_v ){
             }else{
                 printf("not found. nearest   pos is %lld. nearest   value is %lld.\n"
                        ,res.pos,res.value);
-                printf((res.direction<0)?
+                printf((res.direction>0)?
                         "not found. next      pos is %lld. next      value is %lld.\n"
                        :"not found. before    pos is %lld. before    value is %lld.\n"
                        ,res.next_pos,res.next_value);
@@ -207,23 +208,29 @@ int memory_8b(uint64_t const& search_v ){
 }
 
 
+
 int main(){
     
     
-    auto search_v = uint64_t(1000); // todo: valid but not sufficient. i also want both l and r values of last calc.  
-//    memory_16b(search_v);
-//    return (0);
     
-    {
-        //  16 bytes array
-        file_syscall_16b(search_v);
-        memory_16b(search_v);
-
-        // 8 bytes array
-        memory_8b(search_v);
+    for(auto i = 0; i < 1000; ++i){
+        
+    
+        auto search_v = uint64_t(i); // todo: valid but not sufficient. i also want both l and r values of last calc.  
+//        auto search_v = uint64_t(11); // todo: valid but not sufficient. i also want both l and r values of last calc.  
+    //    memory_16b(search_v);
+    //    return (0);
+        
+        {
+            //  16 bytes array
+    //        file_syscall_16b(search_v);
+            memory_16b(search_v);
+    
+            // 8 bytes array
+    //        memory_8b(search_v);
+        }
+    
     }
-    
-    
     
 //  
     return 0;

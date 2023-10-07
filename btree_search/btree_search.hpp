@@ -31,7 +31,7 @@ struct btree_search{
      *  [nearest_pos]
      *  [nearest_direction] : (-1,0,1) (left,exact,right) 
      **/
-    btree_search_result search(value_type const& want,int detail=true /* true/false */){
+    btree_search_result search(value_type const& want,int neighbor_value=true /* true/false */){
         
         struct value_info{
             value_type ent;
@@ -77,8 +77,6 @@ struct btree_search{
                 +is_overflow_min){
                 break;
             } 
-//                +(l.b >=upper_limit_size)+(r.b>=upper_limit_size) 
-//                +(l.b<lower_limit_size) +(r.b<lower_limit_size)) break;
             
             min_size__=min_size; 
             max_size__=max_size;
@@ -111,19 +109,20 @@ struct btree_search{
             //printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         }
         exact = r.done*(want == *r.v) + r.done*(want == *l.v);
-        res = r.break_bit + !r.break_bit*res ;
+        //res = r.break_bit + !r.break_bit*res ;
 //        printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         
         {
             auto result = btree_search_result{};
-            result.direction = !exact*res;
-            if(detail){
-                auto a = (want>*r.v)*(want - *r.v)+!(want>*r.v)*(*r.v-want); 
-                auto b = (want>*l.v)*(want - *l.v)+!(want>*l.v)*(*l.v-want); 
-                result.pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
-                result.pos = (result.pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.pos>=upper_limit_size)*result.pos; 
-                result.value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
-                result.overflow = is_overflow_max+is_overflow_min;
+            auto a = (want>*r.v)*(want - *r.v)+!(want>*r.v)*(*r.v-want); 
+            auto b = (want>*l.v)*(want - *l.v)+!(want>*l.v)*(*l.v-want); 
+            result.pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
+            result.pos = (result.pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.pos>=upper_limit_size)*result.pos; 
+            result.value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
+            result.direction = !exact*((want > result.value)*1+(want < result.value)*-1);
+            result.overflow = is_overflow_max+is_overflow_min;
+            
+            if(neighbor_value){
                 if(!exact*!result.overflow){
                     result.next_pos = static_cast<offset_type>(!(a<b))*(result.pos+block_size) + static_cast<offset_type>(a<b)*(result.pos-block_size); 
                     value_type * next_value_ptr=0;
