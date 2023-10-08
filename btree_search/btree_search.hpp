@@ -125,9 +125,13 @@ struct btree_search{
             if(neighbor_value){
                 if(!exact*!result.overflow){
                     result.next_pos = static_cast<offset_type>(!(a<b))*(result.pos+block_size) + static_cast<offset_type>(a<b)*(result.pos-block_size); 
-                    value_type * next_value_ptr=0;
+                    
+                    auto next_value_ptr=&result.next_value;
                     prf->read_value(result.next_pos,&next_value_ptr);
-                    result.next_value=*next_value_ptr;
+                    
+                    if(next_value_ptr)result.next_value=*next_value_ptr;
+                    prf->read_value(16,&r.v);
+                    
                 }
             }
             return result;
