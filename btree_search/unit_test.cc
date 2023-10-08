@@ -83,9 +83,6 @@ int file_syscall_16b(uint64_t const & search_v){
                 printf("overflow %s\n",res.overflow ? ((res.direction>0)?"upper":"lower"):"nothing" );
             }
         }
-//        auto res = bt.search(static_cast<file_syscall_16b_pref::value_type>(search_v));
-//        printf("%s. pos is %lld. direction is %d\n",!res.direction?"found": "not found",res.pos,res.direction);
-//        return !res.direction;
         return 0;
     }
 }
@@ -106,10 +103,6 @@ int memory_16b(uint64_t const& search_v){
         
     };
     
-    
-//    not found. nearest   pos is 792. nearest   value is 990.
-//    not found. before    pos is 0    before    value is 0.
-
     
     constexpr auto len = 100; 
     memory_16b_arr_pref::value_type data[len*2];
@@ -162,14 +155,6 @@ int memory_8b(uint64_t const& search_v ){
         }
     };
 
-//    constexpr auto len = 100; 
-//    memory_8b_arr_pref::value_type data[len*2];
-//    //auto search_v=memory_8b_arr_pref::value_type(550);
-//    auto cnt = 0;
-//    for(auto i = 0; i <len; i+=2){
-//        data[i] = i * 10;
-//        data[i+1] = data[i]+10;
-//    }
     
     constexpr auto len = 100; 
     memory_8b_arr_pref::value_type data[len];
@@ -184,8 +169,6 @@ int memory_8b(uint64_t const& search_v ){
         auto dir = int(0);
         auto bt = kautil::algorithm::btree_search{&pref};
         
-//        auto res = bt.search(static_cast<memory_8b_arr_pref::value_type>(search_v));
-//        printf("%s. pos is %lld. direction is %d\n",!res.direction?"found": "not found",res.pos,res.direction);
         {
             auto res = bt.search(static_cast<memory_8b_arr_pref::value_type>(search_v));
             if(!res.direction){
@@ -216,18 +199,13 @@ int main(){
     for(auto i = 0; i < 1000; ++i){
 //        
         auto search_v = uint64_t(i); 
-//        auto search_v = uint64_t(1); 
-//        auto search_v = uint64_t(11); 
-    //    memory_16b(search_v);
-    //    return (0);
-        
         {
             //  16 bytes array
             file_syscall_16b(search_v);
-//            memory_16b(search_v);
+            memory_16b(search_v);
     
             // 8 bytes array
-    //        memory_8b(search_v);
+            memory_8b(search_v);
         }
     
     }
