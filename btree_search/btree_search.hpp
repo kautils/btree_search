@@ -16,14 +16,16 @@ struct btree_search{
     /// @return true if find [want]
     struct btree_search_result{
         //offset_type * nearest_pos;
-        value_type value;
-        offset_type pos; 
+        value_type nearest_value;
+        offset_type nearest_pos; 
         
-        value_type next_value;
-        offset_type next_pos; 
+        value_type neighbor_value;
+        offset_type neighbor_pos; 
         
         int direction = 0;
         bool overflow = false;
+        pref * prf=0;
+        
     };
 
 
@@ -48,13 +50,12 @@ struct btree_search{
         auto res = short(-2);
         auto pos = offset_type(0);
         auto lower_limit_size = offset_type(0);
-        auto upper_limit_size = prf->max_size();
+        auto upper_limit_size = prf->size();
         auto max_size = upper_limit_size; 
         auto min_size = offset_type(0);
         auto entire_direction = 1;
         auto entire_direction_init = false;
         auto block_size = prf->block_size();
-        //auto is_continue = true;
         auto max_size__ = offset_type (0); 
         auto min_size__ = offset_type (0); 
         auto is_overflow_max=false;
@@ -109,35 +110,35 @@ struct btree_search{
             //printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         }
         exact = r.done*(want == *r.v) + r.done*(want == *l.v);
-        //res = r.break_bit + !r.break_bit*res ;
-//        printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
+        // printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         
         {
             auto result = btree_search_result{};
             auto a = (want>*r.v)*(want - *r.v)+!(want>*r.v)*(*r.v-want); 
             auto b = (want>*l.v)*(want - *l.v)+!(want>*l.v)*(*l.v-want); 
-            result.pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
-            result.pos = (result.pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.pos>=upper_limit_size)*result.pos; 
-            result.value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
-            result.direction = !exact*((want > result.value)*1+(want < result.value)*-1);
+            result.nearest_pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
+            result.nearest_pos = (result.nearest_pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.nearest_pos>=upper_limit_size)*result.nearest_pos; 
+            result.nearest_value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
+            result.direction = !exact*((want > result.nearest_value)*1+(want < result.nearest_value)*-1);
             result.overflow = is_overflow_max+is_overflow_min;
             
             if(neighbor_value){
                 if(!exact*!result.overflow){
-                    result.next_pos = static_cast<offset_type>(!(a<b))*(result.pos+block_size) + static_cast<offset_type>(a<b)*(result.pos-block_size); 
-                    
-                    auto next_value_ptr=&result.next_value;
-                    prf->read_value(result.next_pos,&next_value_ptr);
-                    
-                    if(next_value_ptr)result.next_value=*next_value_ptr;
-                    prf->read_value(16,&r.v);
-                    
+                    result.neighbor_pos = static_cast<offset_type>(!(a<b))*(result.nearest_pos+block_size) + static_cast<offset_type>(a<b)*(result.nearest_pos-block_size); 
+                    if(r.b==result.neighbor_pos){
+                        result.neighbor_value = *r.v;
+                    }else{
+                        auto neighbor_value_ptr=&result.neighbor_value;
+                        prf->read_value(result.neighbor_pos,&neighbor_value_ptr);
+                        if(neighbor_value_ptr)result.neighbor_value=*neighbor_value_ptr;
+                    }
                 }
             }
             return result;
         }
-        
     }
+    
+    
     
 private:
     pref * prf=0;
