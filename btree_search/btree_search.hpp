@@ -119,11 +119,17 @@ struct btree_search{
             result.nearest_pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
             result.nearest_pos = (result.nearest_pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.nearest_pos>=upper_limit_size)*result.nearest_pos; 
             result.nearest_value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
-            result.direction = !exact*((want > result.nearest_value)*1+(want < result.nearest_value)*-1);
+            
             //result.overflow = is_overflow_max+is_overflow_min;
             result.overflow=
                  (2==(upper_limit_size<=pos)+(res>0))
                 +(2==(lower_limit_size>=pos)+(res<0) );
+            
+            result.direction = 
+                      result.overflow*res
+                    +!result.overflow*(!exact*((want > result.nearest_value)*1+(want < result.nearest_value)*-1));
+            
+            
             
             if(neighbor_value){
                 if(!exact*!result.overflow){
