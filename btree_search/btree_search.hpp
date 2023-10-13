@@ -61,6 +61,10 @@ struct btree_search{
         auto is_overflow_max=false;
         auto is_overflow_min=false;
         
+        
+        // if size of entity is zero, then return immediately as overflowed result.
+        if(2==!max_size+!min_size)return btree_search_result{.nearest_pos=0,.direction=want>=0,.overflow=true};
+        
         for(;res;){
             auto mid = ((max_size-min_size) /  2 + min_size);
             auto adj = mid % (block_size);
@@ -107,10 +111,10 @@ struct btree_search{
             min_size=static_cast<offset_type>(
                   (res>0)*((entire_direction==-1)*(r.b+(block_size)) +!(entire_direction==-1)*pos)
                 +!(res>0)*min_size );
-            //printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
+//            printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         }
         exact = r.done*(want == *r.v) + r.done*(want == *l.v);
-        // printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
+        //printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         
         {
             auto result = btree_search_result{};
