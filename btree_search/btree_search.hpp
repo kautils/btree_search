@@ -2,7 +2,6 @@
 #define KAUTIL_ALGORITHM_BTREE_SEARCH_BTREE_SEARCH_BTREE_SEARCH_H
 
 
-#include <stdio.h>
 
 namespace kautil{
 namespace algorithm{
