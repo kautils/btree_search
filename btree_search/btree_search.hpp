@@ -1,6 +1,9 @@
 #ifndef KAUTIL_ALGORITHM_BTREE_SEARCH_BTREE_SEARCH_BTREE_SEARCH_H
 #define KAUTIL_ALGORITHM_BTREE_SEARCH_BTREE_SEARCH_BTREE_SEARCH_H
 
+
+#include <stdio.h>
+
 namespace kautil{
 namespace algorithm{
 
@@ -24,6 +27,7 @@ struct btree_search{
         
         int direction = 0;
         bool overflow = false;
+        bool nan = true; 
         pref * prf=0;
         
     };
@@ -114,7 +118,7 @@ struct btree_search{
 //            printf("%d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         }
         exact = r.done*(want == *r.v) + r.done*(want == *l.v);
-        //printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
+//        printf("---- %d %ld [%lld %lld] (%lld %lld) |%ld %ld|\n",res,pos,l.b,r.b,*l.v,*r.v,min_size,max_size); fflush(stdout);
         
         {
             auto result = btree_search_result{};
@@ -123,8 +127,8 @@ struct btree_search{
             result.nearest_pos = static_cast<offset_type>(!(a<b))*l.b + static_cast<offset_type>(a<b)*r.b; // if abs is equal, l is prior 
             result.nearest_pos = (result.nearest_pos>=upper_limit_size)*(upper_limit_size-block_size) + !(result.nearest_pos>=upper_limit_size)*result.nearest_pos; 
             result.nearest_value = !(a<b)* *l.v + (a<b)* *r.v; // if abs is equal, l is prior 
+            result.nan = !(a<b)*!l.done + (a<b)*!r.done; // if abs is equal, l is prior 
             
-            //result.overflow = is_overflow_max+is_overflow_min;
             result.overflow=
                  (2==(upper_limit_size<=pos)+(res>0))
                 +(2==(lower_limit_size>=pos)+(res<0) );
