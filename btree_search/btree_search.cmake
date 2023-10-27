@@ -28,7 +28,7 @@ CMakeLibraryTemplate(${module_name} EXPORT_LIB_TYPE interface ${${module_name}_c
 
 list(APPEND ${m}_unsetter ${m}_hpps)
 file(GLOB ${m}_hpps ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
-install(FILES ${${m}_hpps} DESTINATION include/kautil/algorithm)
+install(FILES ${${m}_hpps} DESTINATION include/kautil/algorithm/btree_search)
 
 
 set(__t ${${module_name}_interface_tmain})
